@@ -1,0 +1,74 @@
+# Product And Naming
+
+## Product Name
+
+Recommended public name: **Lock Anyway**
+
+Tagline: **Apps can keep your Mac awake. Not unlocked.**
+
+One-line description:
+
+> Lock Anyway locks your Mac after real keyboard and mouse inactivity, even when media, remote desktop, or a single misbehaving process keeps the display awake.
+
+## Why This Name
+
+The research found nearby categories, but no exact consumer-friendly match:
+
+- Keep-awake tools such as Amphetamine, Caffeine, Lungo, and KeepingYouAwake solve the opposite problem.
+- Break reminder apps have the warning/snooze overlay pattern, but they do not lock the Mac after true idle time.
+- Proximity lock apps use Bluetooth, iPhone, Apple Watch, or camera signals rather than real HID idle time.
+- Admin scripts can enforce idle lock, but they are not approachable for normal Mac users.
+
+The first naming pass over-emphasized the countdown grace period. The real missing piece is stricter:
+
+> Another process can keep the Mac awake, but it should not keep the user session unlocked.
+
+**Lock Anyway** captures that promise directly. YouTube, RustDesk, a download helper, or a buggy process can block display sleep; the Mac locks anyway.
+
+## Current Bundle Identity
+
+The current implementation still ships as:
+
+- Display app: `Idle Lock.app`
+- Bundle id: `com.user.IdleLock`
+- Executable: `IdleLock`
+- LaunchAgent: `com.user.idle-lock`
+- Log file: `~/Library/Logs/IdleLock.log`
+
+Do not casually rename the installed app while testing. macOS Accessibility permission is sensitive to bundle identity, signing, and app path. A public rename to `Lock Anyway.app` should happen as a deliberate migration using [RENAME_MIGRATION.md](RENAME_MIGRATION.md).
+
+## Product Promise
+
+Lock Anyway should be understandable to a normal Mac user:
+
+- Set how long the Mac may be idle.
+- See a clear countdown before lock.
+- Press a button or number key to add time.
+- Move the mouse or press a key to cancel.
+- Let media, downloads, and remote desktop keep running while the local session locks.
+- Stop one awake-keeping process from leaving the Mac unlocked all day.
+
+## Non-Goals
+
+- It is not a keep-awake app.
+- It is not a break reminder app.
+- It is not a Bluetooth proximity lock.
+- It is not an MDM/compliance dashboard.
+- It does not auto-pause for fullscreen video by default.
+
+## UI Copy
+
+Countdown copy:
+
+> Locking in 30 seconds. Move mouse or press any key to stay unlocked.
+
+Add-time buttons:
+
+- `1  15 minutes`
+- `2  30 minutes`
+- `3  1 hour`
+- `4  2 hours`
+
+Accessibility copy:
+
+> Lock Anyway needs Accessibility permission only to send the macOS Lock Screen shortcut if the legacy lock command is unavailable.
