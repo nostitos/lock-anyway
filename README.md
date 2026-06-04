@@ -30,6 +30,24 @@ Tagline: **Apps can keep your Mac awake. Not unlocked.**
 
 The important product promise is not the grace period itself; it is that one app should not leave the Mac unlocked all day.
 
+## Typical User Story
+
+You set macOS to lock after a few minutes, then leave the desk expecting the Mac to protect itself. Later you find it still unlocked because one browser tab, meeting app, remote access session, or helper process kept the display awake.
+
+Lock Anyway treats that as the normal case. It does not ask whether the display is asleep, whether Chrome is playing media, or whether a remote session is active. It only asks one question: has anyone touched the local keyboard or mouse recently? If not, it shows a countdown and locks the Mac anyway.
+
+Chrome and Chromium-based apps can interfere with normal display-sleep or screen-lock flows in several common ways:
+
+- video or audio playback, including YouTube, streaming sites, playlists, and muted tabs that are still considered active media
+- WebRTC sessions, including Meet, Zoom in the browser, Discord, Slack huddles, camera, microphone, and screen sharing
+- remote desktop or remote support sessions running in a tab or Chromium shell
+- web apps that request a screen wake lock, presentation mode, kiosk behavior, or fullscreen playback
+- active downloads, uploads, sync, backups, or long-running web jobs that keep the browser process busy
+- Chrome extensions, PWAs, native messaging helpers, or background service workers that keep Chrome alive after the visible tab is closed
+- Electron apps built on Chromium that make the same power-management requests as Chrome tabs
+
+Those behaviors can be useful. A movie should not stop halfway through, a meeting should not blank the screen, and a remote desktop session should stay connected. The problem is when “keep the display awake” accidentally becomes “leave the Mac unlocked all day.” Lock Anyway separates those two things.
+
 ## Install
 
 For a normal user, build the DMG:
