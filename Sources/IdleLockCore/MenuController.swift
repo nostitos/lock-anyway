@@ -187,8 +187,10 @@ public final class MenuController: NSObject {
         submenu.addItem(custom)
 
         if !IdleLockDefaults.delayPresetSeconds.contains(settings.lockDelaySeconds) {
-            let current = NSMenuItem(title: "Current: \(DurationFormatter.menuDelayLabel(settings.lockDelaySeconds))", action: nil, keyEquivalent: "")
+            let current = NSMenuItem(title: "Current: \(DurationFormatter.menuDelayLabel(settings.lockDelaySeconds))", action: #selector(setDelay(_:)), keyEquivalent: "")
+            current.representedObject = settings.lockDelaySeconds
             current.state = .on
+            current.target = self
             submenu.addItem(.separator())
             submenu.addItem(current)
         }
