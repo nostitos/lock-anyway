@@ -2,7 +2,7 @@
 
 Lock Anyway is a native macOS menu bar utility that locks the local Mac after real keyboard and mouse inactivity, even when media playback, remote desktop, or a single misbehaving process keeps the display awake.
 
-The app is currently implemented under the development bundle name **Idle Lock** (`com.user.IdleLock`). Keep that identity until the deliberate rename migration is done; it avoids breaking the Accessibility permission that macOS ties to the signed app.
+The app is currently implemented under the bundle name **Idle Lock** (`com.user.IdleLock`) to keep Accessibility permission stable across development builds.
 
 ## Screenshots
 
@@ -106,7 +106,6 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for build, test, package, and rel
 - [Install guide](docs/INSTALL.md)
 - [Development guide](docs/DEVELOPMENT.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [Rename migration plan](docs/RENAME_MIGRATION.md)
 
 ## Old Watchdog Migration
 

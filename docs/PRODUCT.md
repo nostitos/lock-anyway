@@ -35,7 +35,7 @@ The current implementation still ships as:
 - LaunchAgent: `com.user.idle-lock`
 - Log file: `~/Library/Logs/IdleLock.log`
 
-Do not casually rename the installed app while testing. macOS Accessibility permission is sensitive to bundle identity, signing, and app path. A public rename to `Lock Anyway.app` should happen as a deliberate migration using [RENAME_MIGRATION.md](RENAME_MIGRATION.md).
+Do not casually rename the installed app while testing. macOS Accessibility permission is sensitive to bundle identity, signing, and app path.
 
 ## Product Promise
 
