@@ -94,15 +94,17 @@ The DMG flow is drag-to-Applications. The app refuses to run from `/Volumes/...`
 1. Run `swift run IdleLockSelfTest`.
 2. Run `scripts/reload-app.sh`.
 3. Set custom delay `30s` and countdown warning `10 sec`.
-4. Verify overlay visibility over fullscreen video and all Spaces.
-5. Verify mouse/key activity cancels the countdown.
-6. Verify buttons and number keys add time:
+4. Use `Preview Popup` in Preferences to check the popup without waiting for idle time.
+5. Verify overlay visibility over fullscreen video and all Spaces.
+6. Verify mouse/key activity and clicking the dimmed background cancel the countdown.
+7. Verify buttons and number keys add time:
    - `1`: 15 minutes
    - `2`: 30 minutes
    - `3`: 1 hour
    - `4`: 2 hours
-7. Verify countdown reaches lock.
-8. Verify RustDesk remains connected while the local Mac locks.
+8. Verify `Disable Locking` pauses until resumed.
+9. Verify countdown reaches lock.
+10. Verify RustDesk remains connected while the local Mac locks.
 
 ## Do Not Create Duplicate App Copies
 

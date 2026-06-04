@@ -43,8 +43,11 @@ public final class IdleMonitor {
         self.overlay.onSnooze = { [weak self] seconds in
             self?.snooze(seconds: seconds)
         }
-        self.overlay.onLockNow = { [weak self] in
-            self?.lockNow()
+        self.overlay.onDisable = { [weak self] in
+            self?.disableUntilResumed()
+        }
+        self.overlay.onDismiss = { [weak self] in
+            self?.dismissPopup()
         }
     }
 
@@ -108,6 +111,32 @@ public final class IdleMonitor {
         cancelCountdown(showPostponed: false)
         state = .paused("Paused until resumed")
         logger.log("Paused until resumed")
+        schedule(after: 5)
+    }
+
+    public func disableUntilResumed() {
+        settings.pauseUntilResumed()
+        mode = .normal
+        overlay.showPostponed(
+            message: "Locking disabled",
+            detail: "Resume from the menu when you want Idle Lock active again."
+        )
+        state = .paused("Paused until resumed")
+        logger.log("Disabled until resumed from countdown popup")
+        schedulePostponedHide()
+        schedule(after: 5)
+    }
+
+    public func dismissPopup() {
+        pendingPostponedHide?.cancel()
+        mode = .normal
+        overlay.hide()
+        if settings.isPaused {
+            state = .paused(settings.pauseDescription ?? "Paused")
+        } else {
+            state = .active
+        }
+        logger.log("Popup dismissed")
         schedule(after: 5)
     }
 

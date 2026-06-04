@@ -88,6 +88,11 @@ private struct PreferencesView: View {
 
                         Toggle("Sound at countdown start", isOn: soundBinding)
                             .padding(.leading, 126)
+
+                        Button("Preview Popup") {
+                            monitor.testCountdown()
+                        }
+                        .padding(.leading, 126)
                     }
                     .padding(8)
                 }

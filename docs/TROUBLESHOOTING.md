@@ -26,12 +26,14 @@ Then grant Accessibility permission to the `/Applications` copy.
 
 ## The Warning Only Dims The Screen
 
-The countdown panel should show a centered warning card with four add-time buttons:
+The countdown panel should show a centered warning card with four add-time buttons and a Disable Locking button:
 
 - 15 minutes
 - 30 minutes
 - 1 hour
 - 2 hours
+
+Clicking the dimmed background outside the card should dismiss the popup and cancel the countdown.
 
 If only dimming appears, reload the current build:
 

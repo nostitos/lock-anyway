@@ -44,7 +44,8 @@ Lock Anyway should be understandable to a normal Mac user:
 - Set how long the Mac may be idle.
 - See a clear countdown before lock.
 - Press a button or number key to add time.
-- Move the mouse or press a key to cancel.
+- Disable locking from the popup when the Mac should stay unlocked until resumed.
+- Move the mouse, press a key, or click the dimmed background to cancel.
 - Let media, downloads, and remote desktop keep running while the local session locks.
 - Stop one awake-keeping process from leaving the Mac unlocked all day.
 
@@ -68,6 +69,10 @@ Add-time buttons:
 - `2  30 minutes`
 - `3  1 hour`
 - `4  2 hours`
+
+Popup action:
+
+- `Disable Locking`
 
 Accessibility copy:
 

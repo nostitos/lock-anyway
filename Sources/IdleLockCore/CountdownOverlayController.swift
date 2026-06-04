@@ -1,6 +1,12 @@
 import AppKit
 import SwiftUI
 
+private final class FirstMouseHostingView<Content: View>: NSHostingView<Content> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
+        true
+    }
+}
+
 public final class CountdownOverlayController {
     fileprivate final class OverlayModel: ObservableObject {
         @Published var title: String
@@ -27,7 +33,8 @@ public final class CountdownOverlayController {
     )
 
     public var onSnooze: ((TimeInterval) -> Void)?
-    public var onLockNow: (() -> Void)?
+    public var onDisable: (() -> Void)?
+    public var onDismiss: (() -> Void)?
 
     public init() {}
 
@@ -46,9 +53,9 @@ public final class CountdownOverlayController {
         model.remainingSeconds = remainingSeconds
     }
 
-    public func showPostponed(message: String = "Lock postponed") {
+    public func showPostponed(message: String = "Lock postponed", detail: String = "Choose extra time or let this close automatically.") {
         model.title = message
-        model.detail = "Choose extra time or let this close automatically."
+        model.detail = detail
         model.remainingSeconds = 0
         model.showsRemaining = false
         ensurePanels()
@@ -144,12 +151,13 @@ public final class CountdownOverlayController {
             let view = CountdownOverlayView(
                 model: model,
                 onSnooze: { [weak self] seconds in self?.onSnooze?(seconds) },
-                onLockNow: { [weak self] in self?.onLockNow?() }
+                onDisable: { [weak self] in self?.onDisable?() },
+                onDismiss: { [weak self] in self?.onDismiss?() }
             )
 
             let container = NSView(frame: NSRect(origin: .zero, size: screen.frame.size))
             container.autoresizingMask = [.width, .height]
-            let hostingView = NSHostingView(rootView: view)
+            let hostingView = FirstMouseHostingView(rootView: view)
             hostingView.frame = container.bounds
             hostingView.autoresizingMask = [.width, .height]
             hostingView.translatesAutoresizingMaskIntoConstraints = false
@@ -169,7 +177,8 @@ public final class CountdownOverlayController {
 private struct CountdownOverlayView: View {
     @ObservedObject var model: CountdownOverlayController.OverlayModel
     let onSnooze: (TimeInterval) -> Void
-    let onLockNow: () -> Void
+    let onDisable: () -> Void
+    let onDismiss: () -> Void
     private let buttonColumns = [
         GridItem(.fixed(150), spacing: 10),
         GridItem(.fixed(150), spacing: 10),
@@ -181,6 +190,10 @@ private struct CountdownOverlayView: View {
         ZStack {
             Color.black.opacity(0.46)
                 .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onDismiss()
+                }
 
             VStack(spacing: 18) {
                 VStack(spacing: 10) {
@@ -191,7 +204,7 @@ private struct CountdownOverlayView: View {
                         Text("\(model.remainingSeconds)")
                             .font(.system(size: 76, weight: .bold, design: .rounded))
                             .monospacedDigit()
-                            .foregroundStyle(Color(red: 0.78, green: 0.10, blue: 0.08))
+                            .foregroundStyle(Color(red: 0.04, green: 0.19, blue: 0.42))
                     }
                     Text(model.detail)
                         .font(.system(size: 16, weight: .regular))
@@ -229,10 +242,19 @@ private struct CountdownOverlayView: View {
                     }
                 }
 
-                Button("Lock Now") {
-                    onLockNow()
+                Button("Disable Locking") {
+                    onDisable()
                 }
-                .buttonStyle(.bordered)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Color(red: 0.14, green: 0.18, blue: 0.24))
+                .frame(width: 180, height: 42)
+                .background(Color(red: 0.89, green: 0.92, blue: 0.95))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(Color.black.opacity(0.16), lineWidth: 1)
+                )
+                .buttonStyle(.plain)
             }
             .padding(28)
             .frame(width: 720)

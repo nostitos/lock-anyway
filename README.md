@@ -17,6 +17,7 @@ The app is currently implemented under the bundle name **Idle Lock** (`com.user.
 - Reads real HID idle time from `IOHIDSystem`.
 - Shows a visible countdown before locking.
 - Lets the user add time from the countdown panel: 15 minutes, 30 minutes, 1 hour, or 2 hours.
+- Lets the user disable locking entirely from the countdown panel until manually resumed.
 - Cancels the countdown immediately on keyboard or mouse activity.
 - Locks with `CGSession -suspend` when available, otherwise uses the native `Control-Command-Q` shortcut with Accessibility permission.
 - Starts at login through a user LaunchAgent with crash restart behavior.
@@ -96,7 +97,7 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for build, test, package, and rel
 1. Run `scripts/reload-app.sh`.
 2. Confirm the running app path is `/Applications/Idle Lock.app/Contents/MacOS/IdleLock`.
 3. Set a short custom delay such as `30s` and countdown warning `10 sec`.
-4. Confirm the overlay appears over fullscreen content, mouse/key activity cancels it, add-time buttons work, and the countdown reaches lock.
+4. Confirm the overlay appears over fullscreen content, mouse/key activity or a click on the dimmed background cancels it, add-time buttons work, Disable Locking pauses until resumed, and the countdown reaches lock.
 5. Confirm RustDesk or other remote access stays connected while the local Mac locks.
 
 ## Documentation
