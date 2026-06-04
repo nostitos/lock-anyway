@@ -26,7 +26,6 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
     private let monitor: IdleMonitor
     private var menuController: MenuController?
     private var preferencesWindow: PreferencesWindowController?
-    private var logWindow: LogWindowController?
 
     override init() {
         self.settings = AppSettings()
@@ -57,19 +56,14 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
             settings: settings,
             monitor: monitor,
             launchAgent: launchAgent,
-            lockService: lockService,
             logger: logger
         )
-        logWindow = LogWindowController(logger: logger)
 
         menuController = MenuController(
             settings: settings,
             monitor: monitor,
             lockService: lockService,
-            launchAgent: launchAgent,
-            logger: logger,
-            showPreferences: { [weak self] in self?.preferencesWindow?.show() },
-            showLog: { [weak self] in self?.logWindow?.show() }
+            showPreferences: { [weak self] in self?.preferencesWindow?.show() }
         )
 
         installAutomationObservers()

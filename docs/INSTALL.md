@@ -48,11 +48,7 @@ The package installs and starts the app automatically.
 
 On modern macOS, `CGSession` may be unavailable. In that case the app falls back to sending the native `Control-Command-Q` lock shortcut, which requires Accessibility permission.
 
-Grant permission when macOS asks, or use the menu item:
-
-```text
-Grant Accessibility Permission
-```
+Grant permission when macOS asks. If the app is disabled because permission is missing, click the status row in the menu to open the permission prompt.
 
 If permission was granted to a different copy of the app, remove the duplicate copy and run only:
 

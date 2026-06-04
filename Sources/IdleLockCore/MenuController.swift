@@ -6,29 +6,20 @@ public final class MenuController: NSObject {
     private let settings: AppSettings
     private let monitor: IdleMonitor
     private let lockService: LockService
-    private let launchAgent: LaunchAgentService
-    private let logger: IdleLockLogger
     private let showPreferences: () -> Void
-    private let showLog: () -> Void
     private var state: IdleLockRunState = .active
 
     public init(
         settings: AppSettings,
         monitor: IdleMonitor,
         lockService: LockService,
-        launchAgent: LaunchAgentService,
-        logger: IdleLockLogger,
-        showPreferences: @escaping () -> Void,
-        showLog: @escaping () -> Void
+        showPreferences: @escaping () -> Void
     ) {
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         self.settings = settings
         self.monitor = monitor
         self.lockService = lockService
-        self.launchAgent = launchAgent
-        self.logger = logger
         self.showPreferences = showPreferences
-        self.showLog = showLog
         super.init()
         statusItem.length = NSStatusItem.squareLength
         update(state: .active)
@@ -95,23 +86,15 @@ public final class MenuController: NSObject {
         menu.addItem(.separator())
 
         menu.addItem(lockDelayMenu())
-        menu.addItem(countdownWarningMenu())
-        menu.addItem(pauseMenu())
 
         if settings.isPaused {
             menu.addItem(NSMenuItem(title: "Resume", action: #selector(resume), keyEquivalent: ""))
         }
 
+        menu.addItem(pauseMenu())
+
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Lock Now", action: #selector(lockNow), keyEquivalent: "l"))
-
-        let startAtLogin = NSMenuItem(title: "Start at Login", action: #selector(toggleStartAtLogin), keyEquivalent: "")
-        startAtLogin.state = settings.startAtLogin ? .on : .off
-        menu.addItem(startAtLogin)
-
         menu.addItem(NSMenuItem(title: "Preferences...", action: #selector(openPreferences), keyEquivalent: ","))
-        menu.addItem(NSMenuItem(title: "Show Log", action: #selector(openLog), keyEquivalent: ""))
-        menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
 
         menu.items.forEach { $0.target = self }
@@ -121,7 +104,7 @@ public final class MenuController: NSObject {
     private var stateDescription: String {
         switch state {
         case .active:
-            return "Active"
+            return "Active - locks after \(DurationFormatter.menuDelayLabel(settings.lockDelaySeconds))"
         case .paused(let reason):
             return reason
         case .countdown(let seconds):
@@ -199,22 +182,6 @@ public final class MenuController: NSObject {
         return item
     }
 
-    private func countdownWarningMenu() -> NSMenuItem {
-        let item = NSMenuItem(title: "Countdown warning", action: nil, keyEquivalent: "")
-        let submenu = NSMenu()
-
-        for seconds in IdleLockDefaults.countdownPresetSeconds {
-            let preset = NSMenuItem(title: DurationFormatter.menuDelayLabel(seconds), action: #selector(setCountdown(_:)), keyEquivalent: "")
-            preset.representedObject = seconds
-            preset.state = Int(settings.countdownSeconds) == Int(seconds) ? .on : .off
-            preset.target = self
-            submenu.addItem(preset)
-        }
-
-        item.submenu = submenu
-        return item
-    }
-
     private func pauseMenu() -> NSMenuItem {
         let item = NSMenuItem(title: "Pause for", action: nil, keyEquivalent: "")
         let submenu = NSMenu()
@@ -239,7 +206,6 @@ public final class MenuController: NSObject {
             return
         }
         settings.setLockDelaySeconds(seconds)
-        logger.log("Lock delay set to \(Int(seconds))s")
         monitor.refreshSoon()
         update(state: state)
     }
@@ -262,17 +228,6 @@ public final class MenuController: NSObject {
         }
 
         settings.setCustomDelaySeconds(parsed)
-        logger.log("Custom lock delay set to \(Int(settings.lockDelaySeconds))s")
-        monitor.refreshSoon()
-        update(state: state)
-    }
-
-    @objc private func setCountdown(_ sender: NSMenuItem) {
-        guard let seconds = sender.representedObject as? TimeInterval else {
-            return
-        }
-        settings.setCountdownSeconds(seconds)
-        logger.log("Countdown warning set to \(Int(settings.countdownSeconds))s")
         monitor.refreshSoon()
         update(state: state)
     }
@@ -295,11 +250,6 @@ public final class MenuController: NSObject {
         update(state: monitor.state)
     }
 
-    @objc private func lockNow() {
-        monitor.lockNow()
-        update(state: monitor.state)
-    }
-
     @objc private func grantAccessibility() {
         lockService.openAccessibilityPermissionHelp()
         monitor.refreshSoon()
@@ -311,29 +261,8 @@ public final class MenuController: NSObject {
         }
     }
 
-    @objc private func toggleStartAtLogin() {
-        let enabled = !settings.startAtLogin
-        do {
-            if enabled {
-                try launchAgent.installLaunchAgent(loadNow: false)
-            } else {
-                try launchAgent.disableLaunchAgent()
-            }
-            settings.setStartAtLogin(enabled)
-            logger.log("Start at Login set to \(enabled)")
-        } catch {
-            logger.log("Start at Login change failed: \(error.localizedDescription)")
-            showError(error.localizedDescription)
-        }
-        update(state: state)
-    }
-
     @objc private func openPreferences() {
         showPreferences()
-    }
-
-    @objc private func openLog() {
-        showLog()
     }
 
     @objc private func quit() {

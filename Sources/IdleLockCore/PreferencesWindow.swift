@@ -5,7 +5,6 @@ public final class PreferencesWindowController {
     private let settings: AppSettings
     private let monitor: IdleMonitor
     private let launchAgent: LaunchAgentService
-    private let lockService: LockService
     private let logger: IdleLockLogger
     private var window: NSWindow?
 
@@ -13,13 +12,11 @@ public final class PreferencesWindowController {
         settings: AppSettings,
         monitor: IdleMonitor,
         launchAgent: LaunchAgentService,
-        lockService: LockService,
         logger: IdleLockLogger
     ) {
         self.settings = settings
         self.monitor = monitor
         self.launchAgent = launchAgent
-        self.lockService = lockService
         self.logger = logger
     }
 
@@ -29,14 +26,13 @@ public final class PreferencesWindowController {
                 settings: settings,
                 monitor: monitor,
                 launchAgent: launchAgent,
-                lockService: lockService,
                 logger: logger
             )
             let hosting = NSHostingController(rootView: view)
             let created = NSWindow(contentViewController: hosting)
             created.title = "Idle Lock Preferences"
             created.styleMask = [.titled, .closable, .miniaturizable]
-            created.setContentSize(NSSize(width: 520, height: 460))
+            created.setContentSize(NSSize(width: 560, height: 430))
             created.center()
             window = created
         }
@@ -50,61 +46,54 @@ private struct PreferencesView: View {
     @ObservedObject var settings: AppSettings
     let monitor: IdleMonitor
     let launchAgent: LaunchAgentService
-    let lockService: LockService
     let logger: IdleLockLogger
 
     @State private var customDelayText: String = ""
-    @State private var statusMessage: String = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Idle Lock")
-                .font(.system(size: 24, weight: .semibold))
-
-            GroupBox("Timing") {
-                VStack(alignment: .leading, spacing: 14) {
-                    Picker("Lock after", selection: delayBinding) {
-                        ForEach(IdleLockDefaults.delayPresetSeconds, id: \.self) { seconds in
-                            Text(DurationFormatter.menuDelayLabel(seconds)).tag(seconds)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                GroupBox("Schedule") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        preferenceRow("Lock after") {
+                            Picker("Lock after", selection: delayBinding) {
+                                ForEach(IdleLockDefaults.delayPresetSeconds, id: \.self) { seconds in
+                                    Text(DurationFormatter.menuDelayLabel(seconds)).tag(seconds)
+                                }
+                                Text("Custom").tag(settings.customDelaySeconds)
+                            }
+                            .labelsHidden()
+                            .pickerStyle(.menu)
                         }
-                        Text("Custom").tag(settings.customDelaySeconds)
-                    }
-                    .pickerStyle(.menu)
 
-                    HStack {
-                        TextField("Custom seconds", text: $customDelayText)
-                            .textFieldStyle(.roundedBorder)
-                        Button("Apply") {
-                            applyCustomDelay()
+                        preferenceRow("Custom delay") {
+                            HStack(spacing: 8) {
+                                TextField("Examples: 30s, 5m, 1h", text: $customDelayText)
+                                    .textFieldStyle(.roundedBorder)
+                                Button("Apply") {
+                                    applyCustomDelay()
+                                }
+                            }
                         }
-                    }
 
-                    Picker("Countdown warning", selection: countdownBinding) {
-                        ForEach(IdleLockDefaults.countdownPresetSeconds, id: \.self) { seconds in
-                            Text(DurationFormatter.menuDelayLabel(seconds)).tag(seconds)
+                        preferenceRow("Countdown") {
+                            Picker("Countdown warning", selection: countdownBinding) {
+                                ForEach(IdleLockDefaults.countdownPresetSeconds, id: \.self) { seconds in
+                                    Text(DurationFormatter.menuDelayLabel(seconds)).tag(seconds)
+                                }
+                            }
+                            .labelsHidden()
+                            .pickerStyle(.segmented)
                         }
+
+                        Toggle("Sound at countdown start", isOn: soundBinding)
+                            .padding(.leading, 126)
                     }
-                    .pickerStyle(.segmented)
+                    .padding(8)
                 }
-                .padding(8)
-            }
 
-            GroupBox("Controls") {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Button("Test Countdown") {
-                            monitor.testCountdown()
-                        }
-                        Button("Lock Now") {
-                            monitor.lockNow()
-                        }
-                        Button("Grant Accessibility Permission") {
-                            lockService.openAccessibilityPermissionHelp()
-                            monitor.refreshSoon()
-                        }
-                    }
-
-                    HStack {
+                GroupBox("Pause") {
+                    HStack(spacing: 8) {
                         Button("Pause 30 min") {
                             monitor.pause(for: 1_800)
                         }
@@ -118,24 +107,30 @@ private struct PreferencesView: View {
                             monitor.resume()
                         }
                     }
-
-                    Toggle("Sound at countdown start", isOn: soundBinding)
-                    Toggle("Start at Login", isOn: startAtLoginBinding)
+                    .padding(8)
                 }
-                .padding(8)
+
+                GroupBox("System") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Toggle("Start at Login", isOn: startAtLoginBinding)
+                    }
+                    .padding(8)
+                }
             }
-
-            Text(statusMessage)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Spacer()
+            .padding(22)
         }
-        .padding(22)
         .onAppear {
             customDelayText = DurationFormatter.compact(settings.customDelaySeconds)
-            refreshStatus()
+        }
+    }
+
+    private func preferenceRow<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Text(title)
+                .frame(width: 114, alignment: .trailing)
+                .foregroundStyle(.secondary)
+            content()
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -150,7 +145,6 @@ private struct PreferencesView: View {
             set: { value in
                 settings.setLockDelaySeconds(value)
                 monitor.refreshSoon()
-                refreshStatus()
             }
         )
     }
@@ -161,7 +155,6 @@ private struct PreferencesView: View {
             set: { value in
                 settings.setCountdownSeconds(value)
                 monitor.refreshSoon()
-                refreshStatus()
             }
         )
     }
@@ -184,11 +177,10 @@ private struct PreferencesView: View {
                         try launchAgent.disableLaunchAgent()
                     }
                     settings.setStartAtLogin(enabled)
-                    statusMessage = enabled ? "Start at Login enabled." : "Start at Login disabled."
                 } catch {
                     settings.setStartAtLogin(false)
-                    statusMessage = error.localizedDescription
                     logger.log("Start at Login change failed: \(error.localizedDescription)")
+                    showError(error.localizedDescription)
                 }
             }
         )
@@ -196,21 +188,19 @@ private struct PreferencesView: View {
 
     private func applyCustomDelay() {
         guard let seconds = DurationParser.parseSeconds(customDelayText) else {
-            statusMessage = "Could not parse custom delay."
+            showError("Could not parse custom delay.")
             return
         }
         settings.setCustomDelaySeconds(seconds)
         customDelayText = DurationFormatter.compact(settings.customDelaySeconds)
         monitor.refreshSoon()
-        refreshStatus()
     }
 
-    private func refreshStatus() {
-        let availability = lockService.availability(promptForAccessibility: false)
-        if let strategy = availability.strategy {
-            statusMessage = "Lock method: \(strategy.description)."
-        } else {
-            statusMessage = availability.reason ?? "No lock method available."
-        }
+    private func showError(_ message: String) {
+        let alert = NSAlert()
+        alert.messageText = "Idle Lock"
+        alert.informativeText = message
+        alert.alertStyle = .warning
+        alert.runModal()
     }
 }

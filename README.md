@@ -95,10 +95,9 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for build, test, package, and rel
 
 1. Run `scripts/reload-app.sh`.
 2. Confirm the running app path is `/Applications/Idle Lock.app/Contents/MacOS/IdleLock`.
-3. Use `Lock Now` once to verify the selected lock strategy.
-4. Set a short custom delay such as `30s` and countdown warning `10 sec`.
-5. Confirm the overlay appears over fullscreen content, mouse/key activity cancels it, add-time buttons work, and the countdown reaches lock.
-6. Confirm RustDesk or other remote access stays connected while the local Mac locks.
+3. Set a short custom delay such as `30s` and countdown warning `10 sec`.
+4. Confirm the overlay appears over fullscreen content, mouse/key activity cancels it, add-time buttons work, and the countdown reaches lock.
+5. Confirm RustDesk or other remote access stays connected while the local Mac locks.
 
 ## Documentation
 

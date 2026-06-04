@@ -41,7 +41,7 @@ scripts/reload-app.sh
 
 Then test with a short custom delay such as `30s` and countdown `10 sec`.
 
-## `Lock Now` Does Nothing
+## The Mac Does Not Lock
 
 Open the log:
 
