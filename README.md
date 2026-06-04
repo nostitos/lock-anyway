@@ -27,7 +27,7 @@ Product name: **Lock Anyway**
 
 Tagline: **Apps can keep your Mac awake. Not unlocked.**
 
-The name was revised after the WebGPT/source-backed naming pass in [IdleLock-App-Name-Research.md](IdleLock-App-Name-Research.md). The important product promise is not the grace period itself; it is that one app should not leave the Mac unlocked all day.
+The important product promise is not the grace period itself; it is that one app should not leave the Mac unlocked all day.
 
 ## Install
 
@@ -107,7 +107,6 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for build, test, package, and rel
 - [Development guide](docs/DEVELOPMENT.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Rename migration plan](docs/RENAME_MIGRATION.md)
-- [Research report](IdleLock-App-Name-Research.md)
 
 ## Old Watchdog Migration
 
