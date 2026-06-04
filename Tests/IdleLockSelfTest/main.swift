@@ -63,6 +63,13 @@ do {
 }
 
 do {
+    tests.expect(DurationFormatter.pauseDurationLabel(1) == "1 min", "pause display rounds seconds to minutes")
+    tests.expect(DurationFormatter.pauseDurationLabel(119) == "2 min", "pause display rounds up minutes")
+    tests.expect(DurationFormatter.pauseDurationLabel(3_599) == "1 hour", "pause display rounds near-hour to hours")
+    tests.expect(DurationFormatter.pauseDurationLabel(7_200) == "2 hours", "pause display shows whole hours")
+}
+
+do {
     let active = IdleStateMachine.decision(
         idleSeconds: 10,
         delaySeconds: 300,

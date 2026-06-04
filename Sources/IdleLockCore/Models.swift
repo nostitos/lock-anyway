@@ -127,7 +127,16 @@ public enum DurationFormatter {
 
     public static func pauseLabel(until date: Date) -> String {
         let remaining = max(0, date.timeIntervalSinceNow)
-        return "Paused for \(compact(remaining))"
+        return "Paused for \(pauseDurationLabel(remaining))"
+    }
+
+    public static func pauseDurationLabel(_ seconds: TimeInterval) -> String {
+        let minutes = max(1, Int(ceil(seconds / 60)))
+        if minutes >= 60, minutes % 60 == 0 {
+            let hours = minutes / 60
+            return hours == 1 ? "1 hour" : "\(hours) hours"
+        }
+        return minutes == 1 ? "1 min" : "\(minutes) min"
     }
 }
 
