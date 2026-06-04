@@ -137,4 +137,20 @@ The old script at `/Users/t/.local/bin/idle-lock-watchdog` is left on disk for r
 
 ## Distribution Note
 
-When Developer ID certificates are available in the keychain, `scripts/build-app.sh` signs the app with `Developer ID Application` and `scripts/package-app.sh` signs the package with `Developer ID Installer`. Notarization is still required for broad distribution outside this machine.
+Release artifacts should be Developer ID signed, notarized by Apple, and stapled before publishing. When Developer ID certificates are available in the keychain, `scripts/build-app.sh` signs the app with `Developer ID Application` and `scripts/package-app.sh` signs the package with `Developer ID Installer`.
+
+One-time notary credential setup:
+
+```sh
+xcrun notarytool store-credentials lock-anyway --apple-id "you@example.com" --team-id "RJL9XWBZ9L"
+```
+
+Build and notarize:
+
+```sh
+scripts/package-app.sh
+scripts/package-dmg.sh
+IDLE_LOCK_NOTARY_PROFILE=lock-anyway scripts/notarize-release.sh
+```
+
+`scripts/notarize-release.sh` submits the PKG and DMG, waits for Apple approval, staples the tickets, validates the installer signature, and regenerates `dist/SHA256SUMS.txt`.
