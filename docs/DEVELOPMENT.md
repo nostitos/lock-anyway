@@ -89,6 +89,26 @@ dist/LockAnyway-1.0.dmg
 
 The DMG flow is drag-to-Applications. The app refuses to run from `/Volumes/...` so users do not accidentally bind Accessibility permission or Start at Login to the mounted image.
 
+For a notarized release DMG, reuse any `notarytool` profile for the same Apple Developer team:
+
+```sh
+scripts/package-dmg.sh \
+  --notarize \
+  --notary-profile TilePilot \
+  --notary-keychain "$HOME/Library/Keychains/login.keychain-db"
+```
+
+The release DMG script follows the same flow as TilePilot:
+
+- build the release `.app`
+- sign the app with `Developer ID Application`, hardened runtime, and timestamp
+- create a drag-to-Applications staging folder
+- build a read/write DMG with `hdiutil`
+- apply Finder icon layout
+- convert to compressed `UDZO`
+- sign the final DMG
+- optionally submit the DMG to Apple notarization, staple the ticket, and run Gatekeeper validation
+
 ## Manual Verification
 
 1. Run `swift run IdleLockSelfTest`.

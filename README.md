@@ -139,18 +139,19 @@ The old script at `/Users/t/.local/bin/idle-lock-watchdog` is left on disk for r
 
 Release artifacts should be Developer ID signed, notarized by Apple, and stapled before publishing. When Developer ID certificates are available in the keychain, `scripts/build-app.sh` signs the app with `Developer ID Application` and `scripts/package-app.sh` signs the package with `Developer ID Installer`.
 
-One-time notary credential setup:
+One-time notary credential setup, only if you do not already have a working profile for this Apple Developer team:
 
 ```sh
 xcrun notarytool store-credentials lock-anyway --apple-id "you@example.com" --team-id "RJL9XWBZ9L"
 ```
 
-Build and notarize:
+Build and notarize with the existing `TilePilot` profile:
 
 ```sh
-scripts/package-app.sh
-scripts/package-dmg.sh
-IDLE_LOCK_NOTARY_PROFILE=lock-anyway scripts/notarize-release.sh
+scripts/package-dmg.sh \
+  --notarize \
+  --notary-profile TilePilot \
+  --notary-keychain "$HOME/Library/Keychains/login.keychain-db"
 ```
 
-`scripts/notarize-release.sh` submits the PKG and DMG, waits for Apple approval, staples the tickets, validates the installer signature, and regenerates `dist/SHA256SUMS.txt`.
+The notary profile does not have to be app-specific. It only has to belong to the same Apple Developer team. `scripts/package-dmg.sh --notarize` submits the signed DMG to Apple, waits for approval, staples the ticket, and runs a Gatekeeper assessment.
