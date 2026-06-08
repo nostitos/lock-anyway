@@ -1,5 +1,6 @@
 import ApplicationServices
 import AppKit
+import Darwin
 import Foundation
 
 public protocol LockControlling {
@@ -120,19 +121,32 @@ public final class LockService: LockControlling {
             throw IdleLockError.lockUnavailable("Accessibility permission is required to send Control-Command-Q.")
         }
 
-        guard let source = CGEventSource(stateID: .hidSystemState),
-              let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 12, keyDown: true),
-              let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 12, keyDown: false)
-        else {
-            throw IdleLockError.lockCommandFailed("Unable to create Control-Command-Q events.")
+        guard let source = CGEventSource(stateID: .hidSystemState) else {
+            throw IdleLockError.lockCommandFailed("Unable to create Control-Command-Q event source.")
         }
 
-        let flags: CGEventFlags = [.maskControl, .maskCommand]
-        keyDown.flags = flags
-        keyUp.flags = flags
-        keyDown.post(tap: .cghidEventTap)
-        keyUp.post(tap: .cghidEventTap)
+        let controlKey: CGKeyCode = 59
+        let commandKey: CGKeyCode = 55
+        let qKey: CGKeyCode = 12
+        let noFlags = CGEventFlags(rawValue: 0)
+
+        try postKey(source: source, keyCode: controlKey, keyDown: true, flags: [.maskControl])
+        try postKey(source: source, keyCode: commandKey, keyDown: true, flags: [.maskControl, .maskCommand])
+        try postKey(source: source, keyCode: qKey, keyDown: true, flags: [.maskControl, .maskCommand])
+        try postKey(source: source, keyCode: qKey, keyDown: false, flags: [.maskControl, .maskCommand])
+        try postKey(source: source, keyCode: commandKey, keyDown: false, flags: [.maskControl])
+        try postKey(source: source, keyCode: controlKey, keyDown: false, flags: noFlags)
 
         logger.log("Lock command sent with Control-Command-Q")
+    }
+
+    private func postKey(source: CGEventSource, keyCode: CGKeyCode, keyDown: Bool, flags: CGEventFlags) throws {
+        guard let event = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: keyDown) else {
+            throw IdleLockError.lockCommandFailed("Unable to create Control-Command-Q key event.")
+        }
+
+        event.flags = flags
+        event.post(tap: .cghidEventTap)
+        usleep(20_000)
     }
 }
