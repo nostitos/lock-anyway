@@ -6,18 +6,21 @@ public final class PreferencesWindowController {
     private let monitor: IdleMonitor
     private let launchAgent: LaunchAgentService
     private let logger: IdleLockLogger
+    private let showLog: () -> Void
     private var window: NSWindow?
 
     public init(
         settings: AppSettings,
         monitor: IdleMonitor,
         launchAgent: LaunchAgentService,
-        logger: IdleLockLogger
+        logger: IdleLockLogger,
+        showLog: @escaping () -> Void
     ) {
         self.settings = settings
         self.monitor = monitor
         self.launchAgent = launchAgent
         self.logger = logger
+        self.showLog = showLog
     }
 
     public func show() {
@@ -26,13 +29,14 @@ public final class PreferencesWindowController {
                 settings: settings,
                 monitor: monitor,
                 launchAgent: launchAgent,
-                logger: logger
+                logger: logger,
+                showLog: showLog
             )
             let hosting = NSHostingController(rootView: view)
             let created = NSWindow(contentViewController: hosting)
             created.title = "Idle Lock Preferences"
             created.styleMask = [.titled, .closable, .miniaturizable]
-            created.setContentSize(NSSize(width: 560, height: 430))
+            created.setContentSize(NSSize(width: 560, height: 500))
             created.center()
             window = created
         }
@@ -47,6 +51,7 @@ private struct PreferencesView: View {
     let monitor: IdleMonitor
     let launchAgent: LaunchAgentService
     let logger: IdleLockLogger
+    let showLog: () -> Void
 
     @State private var customDelayText: String = ""
 
@@ -118,6 +123,21 @@ private struct PreferencesView: View {
                 GroupBox("System") {
                     VStack(alignment: .leading, spacing: 10) {
                         Toggle("Start at Login", isOn: startAtLoginBinding)
+                    }
+                    .padding(8)
+                }
+
+                GroupBox("Diagnostics") {
+                    HStack(spacing: 10) {
+                        Button("Show Log") {
+                            showLog()
+                        }
+
+                        Text(logger.logURL.path)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
                     }
                     .padding(8)
                 }

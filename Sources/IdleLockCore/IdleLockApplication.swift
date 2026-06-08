@@ -26,6 +26,7 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
     private let monitor: IdleMonitor
     private var menuController: MenuController?
     private var preferencesWindow: PreferencesWindowController?
+    private var logWindow: LogWindowController?
 
     override init() {
         self.settings = AppSettings()
@@ -52,11 +53,13 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
+        logWindow = LogWindowController(logger: logger)
         preferencesWindow = PreferencesWindowController(
             settings: settings,
             monitor: monitor,
             launchAgent: launchAgent,
-            logger: logger
+            logger: logger,
+            showLog: { [weak self] in self?.logWindow?.show() }
         )
 
         menuController = MenuController(

@@ -9,7 +9,7 @@ uid="$(id -u)"
 
 if [[ ! -w /Applications ]]; then
   echo "Cannot write to /Applications without administrator authorization." >&2
-  echo "Run scripts/package-app.sh and open dist/IdleLock-1.0.pkg to install manually." >&2
+  echo "Run scripts/package-app.sh and open the generated dist/IdleLock-<version>.pkg to install manually." >&2
   exit 1
 fi
 
