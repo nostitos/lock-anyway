@@ -66,13 +66,13 @@ scripts/package-app.sh
 Output:
 
 ```text
-dist/IdleLock-1.0.1.pkg
+dist/IdleLock-1.0.2.pkg
 ```
 
 Check package signing:
 
 ```sh
-pkgutil --check-signature dist/IdleLock-1.0.1.pkg
+pkgutil --check-signature dist/IdleLock-1.0.2.pkg
 ```
 
 ## DMG
@@ -84,7 +84,7 @@ scripts/package-dmg.sh
 Output:
 
 ```text
-dist/LockAnyway-1.0.1.dmg
+dist/LockAnyway-1.0.2.dmg
 ```
 
 The DMG flow is drag-to-Applications. The app refuses to run from `/Volumes/...` so users do not accidentally bind Accessibility permission or Start at Login to the mounted image.
@@ -117,14 +117,15 @@ The release DMG script follows the same flow as TilePilot:
 4. Use `Preview Popup` in Preferences to check the popup without waiting for idle time.
 5. Verify overlay visibility over fullscreen video and all Spaces.
 6. Verify mouse/key activity and clicking the dimmed background cancel the countdown.
-7. Verify buttons and number keys add time:
+7. Verify moving the cursor to a screen edge hides the popup immediately instead of leaving the postponed message visible.
+8. Verify buttons and number keys add time:
    - `1`: 15 minutes
    - `2`: 30 minutes
    - `3`: 1 hour
    - `4`: 2 hours
-8. Verify `Disable Locking` pauses until resumed.
-9. Verify countdown reaches lock.
-10. Verify RustDesk remains connected while the local Mac locks.
+9. Verify `Disable Locking` pauses until resumed.
+10. Verify countdown reaches lock.
+11. Verify RustDesk remains connected while the local Mac locks.
 
 ## Do Not Create Duplicate App Copies
 

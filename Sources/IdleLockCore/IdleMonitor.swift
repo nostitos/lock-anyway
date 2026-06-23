@@ -49,6 +49,9 @@ public final class IdleMonitor {
         self.overlay.onDismiss = { [weak self] in
             self?.dismissPopup()
         }
+        self.overlay.onEdgeDismiss = { [weak self] in
+            self?.dismissPopupFromScreenEdge()
+        }
     }
 
     deinit {
@@ -137,6 +140,19 @@ public final class IdleMonitor {
             state = .active
         }
         logger.log("Popup dismissed")
+        schedule(after: 5)
+    }
+
+    public func dismissPopupFromScreenEdge() {
+        pendingPostponedHide?.cancel()
+        mode = .normal
+        overlay.hide()
+        if settings.isPaused {
+            state = .paused(settings.pauseDescription ?? "Paused")
+        } else {
+            state = .active
+        }
+        logger.log("Popup hidden by cursor at screen edge")
         schedule(after: 5)
     }
 
@@ -235,8 +251,14 @@ public final class IdleMonitor {
         do {
             let idle = try idleReader.idleSeconds()
             if IdleStateMachine.shouldCancelCountdown(currentIdle: idle, countdownStartIdle: startIdle) {
-                logger.log("Countdown canceled by HID activity")
-                cancelCountdown(showPostponed: true)
+                if isCursorAtScreenEdge() {
+                    logger.log("Countdown canceled by HID activity at screen edge; popup hidden")
+                    cancelCountdown(showPostponed: false)
+                    state = .active
+                } else {
+                    logger.log("Countdown canceled by HID activity")
+                    cancelCountdown(showPostponed: true)
+                }
                 schedule(after: 5)
                 return
             }
@@ -295,6 +317,13 @@ public final class IdleMonitor {
         }
         pendingPostponedHide = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: work)
+    }
+
+    private func isCursorAtScreenEdge() -> Bool {
+        ScreenEdgeDetector.isAtEdge(
+            point: NSEvent.mouseLocation,
+            screenFrames: NSScreen.screens.map(\.frame)
+        )
     }
 
     private func schedule(after seconds: TimeInterval) {

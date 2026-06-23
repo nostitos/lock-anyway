@@ -1,4 +1,5 @@
 import Darwin
+import CoreGraphics
 import Foundation
 import IdleLockCore
 
@@ -147,6 +148,26 @@ do {
     tests.expect(CountdownClock.displaySeconds(remaining: 29.0) == 29, "countdown changes on whole-second boundary")
     tests.expect(CountdownClock.displaySeconds(remaining: 0) == 0, "countdown reaches zero")
     tests.expect(CountdownClock.nextPollInterval(until: Date().addingTimeInterval(10)) <= 0.5, "countdown polls HID at least twice per second")
+}
+
+do {
+    let frame = CGRect(x: 0, y: 0, width: 1_440, height: 900)
+    tests.expect(
+        ScreenEdgeDetector.isAtEdge(point: CGPoint(x: 8, y: 450), screenFrames: [frame]),
+        "screen edge detector catches left edge"
+    )
+    tests.expect(
+        ScreenEdgeDetector.isAtEdge(point: CGPoint(x: 720, y: 892), screenFrames: [frame]),
+        "screen edge detector catches top edge"
+    )
+    tests.expect(
+        !ScreenEdgeDetector.isAtEdge(point: CGPoint(x: 720, y: 450), screenFrames: [frame]),
+        "screen edge detector ignores center"
+    )
+    tests.expect(
+        !ScreenEdgeDetector.isAtEdge(point: CGPoint(x: 2_000, y: 450), screenFrames: [frame]),
+        "screen edge detector ignores points outside all screens"
+    )
 }
 
 do {

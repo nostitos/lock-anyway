@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 public enum IdleMonitorDecision: Equatable {
@@ -40,6 +41,27 @@ public enum IdleStateMachine {
 
     public static func shouldCancelCountdown(currentIdle: TimeInterval, countdownStartIdle: TimeInterval) -> Bool {
         currentIdle + 0.75 < countdownStartIdle
+    }
+}
+
+public enum ScreenEdgeDetector {
+    public static func isAtEdge(
+        point: CGPoint,
+        screenFrames: [CGRect],
+        margin: CGFloat = 24
+    ) -> Bool {
+        guard point.x.isFinite, point.y.isFinite, margin > 0 else {
+            return false
+        }
+
+        for frame in screenFrames where frame.contains(point) {
+            let insetX = min(margin, frame.width / 2)
+            let insetY = min(margin, frame.height / 2)
+            let innerFrame = frame.insetBy(dx: insetX, dy: insetY)
+            return !innerFrame.contains(point)
+        }
+
+        return false
     }
 }
 

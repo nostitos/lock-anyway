@@ -35,6 +35,8 @@ The countdown panel should show a centered warning card with four add-time butto
 
 Clicking the dimmed background outside the card should dismiss the popup and cancel the countdown.
 
+Moving the cursor to a screen edge during a countdown cancellation should hide the popup immediately instead of showing the temporary postponed message.
+
 If only dimming appears, reload the current build:
 
 ```sh
@@ -86,7 +88,7 @@ If `/Applications/Idle Lock.app` is root-owned or unwritable, build a package an
 
 ```sh
 scripts/package-app.sh
-open dist/IdleLock-1.0.1.pkg
+open dist/IdleLock-1.0.2.pkg
 ```
 
 Do not add an AppleScript `with administrator privileges` fallback to the reload script without an explicit reason.

@@ -59,7 +59,7 @@ scripts/package-dmg.sh
 Then open:
 
 ```text
-dist/LockAnyway-1.0.1.dmg
+dist/LockAnyway-1.0.2.dmg
 ```
 
 Drag `Idle Lock.app` to Applications, then open it from `/Applications`. The app intentionally refuses to run from the mounted disk image so Start at Login and Accessibility permission stay attached to the installed copy.
@@ -73,7 +73,7 @@ scripts/package-app.sh
 Then open the package in Finder:
 
 ```text
-dist/IdleLock-1.0.1.pkg
+dist/IdleLock-1.0.2.pkg
 ```
 
 The current package installs:
@@ -115,7 +115,7 @@ See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for build, test, package, and rel
 1. Run `scripts/reload-app.sh`.
 2. Confirm the running app path is `/Applications/Idle Lock.app/Contents/MacOS/IdleLock`.
 3. Set a short custom delay such as `30s` and countdown warning `10 sec`.
-4. Confirm the overlay appears over fullscreen content, mouse/key activity or a click on the dimmed background cancels it, add-time buttons work, Disable Locking pauses until resumed, and the countdown reaches lock.
+4. Confirm the overlay appears over fullscreen content, mouse/key activity or a click on the dimmed background cancels it, moving the cursor to a screen edge hides the popup immediately, add-time buttons work, Disable Locking pauses until resumed, and the countdown reaches lock.
 5. Confirm RustDesk or other remote access stays connected while the local Mac locks.
 
 ## Documentation

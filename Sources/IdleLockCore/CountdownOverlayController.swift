@@ -25,6 +25,8 @@ public final class CountdownOverlayController {
     private var panels: [NSPanel] = []
     private var localKeyMonitor: Any?
     private var globalKeyMonitor: Any?
+    private var localMouseMonitor: Any?
+    private var globalMouseMonitor: Any?
     private let model = OverlayModel(
         title: "Locking soon",
         detail: "Move mouse or press any key to stay unlocked.",
@@ -35,6 +37,7 @@ public final class CountdownOverlayController {
     public var onSnooze: ((TimeInterval) -> Void)?
     public var onDisable: (() -> Void)?
     public var onDismiss: (() -> Void)?
+    public var onEdgeDismiss: (() -> Void)?
 
     public init() {}
 
@@ -44,7 +47,7 @@ public final class CountdownOverlayController {
         model.remainingSeconds = remainingSeconds
         model.showsRemaining = true
         ensurePanels()
-        startKeyMonitors()
+        startEventMonitors()
         panels.forEach { $0.orderFrontRegardless() }
     }
 
@@ -59,7 +62,7 @@ public final class CountdownOverlayController {
         model.remainingSeconds = 0
         model.showsRemaining = false
         ensurePanels()
-        startKeyMonitors()
+        startEventMonitors()
         panels.forEach { $0.orderFrontRegardless() }
     }
 
@@ -69,14 +72,24 @@ public final class CountdownOverlayController {
         model.remainingSeconds = 0
         model.showsRemaining = false
         ensurePanels()
-        startKeyMonitors()
+        startEventMonitors()
         panels.forEach { $0.orderFrontRegardless() }
     }
 
     public func hide() {
-        stopKeyMonitors()
+        stopEventMonitors()
         panels.forEach { $0.orderOut(nil) }
         panels.removeAll()
+    }
+
+    private func startEventMonitors() {
+        startKeyMonitors()
+        startMouseMonitors()
+    }
+
+    private func stopEventMonitors() {
+        stopKeyMonitors()
+        stopMouseMonitors()
     }
 
     private func startKeyMonitors() {
@@ -110,6 +123,44 @@ public final class CountdownOverlayController {
         }
     }
 
+    private func startMouseMonitors() {
+        let mouseEvents: NSEvent.EventTypeMask = [
+            .mouseMoved,
+            .leftMouseDragged,
+            .rightMouseDragged,
+            .otherMouseDragged
+        ]
+
+        if localMouseMonitor == nil {
+            localMouseMonitor = NSEvent.addLocalMonitorForEvents(matching: mouseEvents) { [weak self] event in
+                guard self?.handleMouseForEdgeDismiss() == true else {
+                    return event
+                }
+                return nil
+            }
+        }
+
+        if globalMouseMonitor == nil {
+            globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: mouseEvents) { [weak self] _ in
+                DispatchQueue.main.async {
+                    _ = self?.handleMouseForEdgeDismiss()
+                }
+            }
+        }
+    }
+
+    private func stopMouseMonitors() {
+        if let localMouseMonitor {
+            NSEvent.removeMonitor(localMouseMonitor)
+            self.localMouseMonitor = nil
+        }
+
+        if let globalMouseMonitor {
+            NSEvent.removeMonitor(globalMouseMonitor)
+            self.globalMouseMonitor = nil
+        }
+    }
+
     private func handleKeyDown(_ event: NSEvent) -> Bool {
         let blockedModifiers: NSEvent.ModifierFlags = [.command, .control, .option]
         guard event.modifierFlags.intersection(blockedModifiers).isEmpty,
@@ -121,6 +172,18 @@ public final class CountdownOverlayController {
         }
 
         onSnooze?(SnoozeOption.all[index - 1].seconds)
+        return true
+    }
+
+    private func handleMouseForEdgeDismiss() -> Bool {
+        guard ScreenEdgeDetector.isAtEdge(
+            point: NSEvent.mouseLocation,
+            screenFrames: NSScreen.screens.map(\.frame)
+        ) else {
+            return false
+        }
+
+        onEdgeDismiss?()
         return true
     }
 
@@ -147,6 +210,7 @@ public final class CountdownOverlayController {
             panel.hidesOnDeactivate = false
             panel.isReleasedWhenClosed = false
             panel.ignoresMouseEvents = false
+            panel.acceptsMouseMovedEvents = true
 
             let view = CountdownOverlayView(
                 model: model,
