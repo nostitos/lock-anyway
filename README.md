@@ -59,7 +59,7 @@ scripts/package-dmg.sh
 Then open:
 
 ```text
-dist/LockAnyway-1.0.2.dmg
+dist/LockAnyway-1.0.3.dmg
 ```
 
 Drag `Idle Lock.app` to Applications, then open it from `/Applications`. The app intentionally refuses to run from the mounted disk image so Start at Login and Accessibility permission stay attached to the installed copy.
@@ -73,7 +73,7 @@ scripts/package-app.sh
 Then open the package in Finder:
 
 ```text
-dist/IdleLock-1.0.2.pkg
+dist/IdleLock-1.0.3.pkg
 ```
 
 The current package installs:

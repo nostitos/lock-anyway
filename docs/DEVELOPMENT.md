@@ -66,13 +66,13 @@ scripts/package-app.sh
 Output:
 
 ```text
-dist/IdleLock-1.0.2.pkg
+dist/IdleLock-1.0.3.pkg
 ```
 
 Check package signing:
 
 ```sh
-pkgutil --check-signature dist/IdleLock-1.0.2.pkg
+pkgutil --check-signature dist/IdleLock-1.0.3.pkg
 ```
 
 ## DMG
@@ -84,7 +84,7 @@ scripts/package-dmg.sh
 Output:
 
 ```text
-dist/LockAnyway-1.0.2.dmg
+dist/LockAnyway-1.0.3.dmg
 ```
 
 The DMG flow is drag-to-Applications. The app refuses to run from `/Volumes/...` so users do not accidentally bind Accessibility permission or Start at Login to the mounted image.

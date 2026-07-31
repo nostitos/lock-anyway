@@ -11,7 +11,7 @@ scripts/package-dmg.sh
 Open:
 
 ```text
-dist/LockAnyway-1.0.2.dmg
+dist/LockAnyway-1.0.3.dmg
 ```
 
 Drag `Idle Lock.app` to Applications, then open it from:
@@ -33,7 +33,7 @@ scripts/package-app.sh
 Open this package in Finder:
 
 ```text
-dist/IdleLock-1.0.2.pkg
+dist/IdleLock-1.0.3.pkg
 ```
 
 The current package installs:

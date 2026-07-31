@@ -88,7 +88,7 @@ If `/Applications/Idle Lock.app` is root-owned or unwritable, build a package an
 
 ```sh
 scripts/package-app.sh
-open dist/IdleLock-1.0.2.pkg
+open dist/IdleLock-1.0.3.pkg
 ```
 
 Do not add an AppleScript `with administrator privileges` fallback to the reload script without an explicit reason.

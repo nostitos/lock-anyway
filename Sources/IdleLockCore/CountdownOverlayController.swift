@@ -48,12 +48,18 @@ public final class CountdownOverlayController {
         model.showsRemaining = true
         ensurePanels()
         startEventMonitors()
-        panels.forEach { $0.orderFrontRegardless() }
+        presentPanels()
     }
 
     public func updateCountdown(remainingSeconds: Int) {
-        model.title = "Locking in \(remainingSeconds) seconds"
-        model.remainingSeconds = remainingSeconds
+        guard model.remainingSeconds != remainingSeconds else {
+            return
+        }
+
+        withAnimation(.easeInOut(duration: 0.28)) {
+            model.title = "Locking in \(remainingSeconds) seconds"
+            model.remainingSeconds = remainingSeconds
+        }
     }
 
     public func showPostponed(message: String = "Lock postponed", detail: String = "Choose extra time or let this close automatically.") {
@@ -63,7 +69,7 @@ public final class CountdownOverlayController {
         model.showsRemaining = false
         ensurePanels()
         startEventMonitors()
-        panels.forEach { $0.orderFrontRegardless() }
+        presentPanels()
     }
 
     public func showTestComplete() {
@@ -73,7 +79,7 @@ public final class CountdownOverlayController {
         model.showsRemaining = false
         ensurePanels()
         startEventMonitors()
-        panels.forEach { $0.orderFrontRegardless() }
+        presentPanels()
     }
 
     public func hide() {
@@ -187,6 +193,28 @@ public final class CountdownOverlayController {
         return true
     }
 
+    private func presentPanels() {
+        let newlyVisiblePanels = panels.filter { !$0.isVisible }
+        let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+
+        newlyVisiblePanels.forEach { panel in
+            panel.alphaValue = reduceMotion ? 1 : 0
+        }
+        panels.forEach { $0.orderFrontRegardless() }
+
+        guard !reduceMotion, !newlyVisiblePanels.isEmpty else {
+            return
+        }
+
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.38
+            context.allowsImplicitAnimation = true
+            newlyVisiblePanels.forEach { panel in
+                panel.animator().alphaValue = 1
+            }
+        }
+    }
+
     private func ensurePanels() {
         guard panels.isEmpty else {
             return
@@ -261,14 +289,13 @@ private struct CountdownOverlayView: View {
 
             VStack(spacing: 18) {
                 VStack(spacing: 10) {
-                    Text(model.title)
-                        .font(.system(size: 28, weight: .semibold))
-                        .foregroundStyle(.black)
+                    AnimatedCountdownTitle(
+                        title: model.title,
+                        remainingSeconds: model.remainingSeconds,
+                        animatesNumber: model.showsRemaining
+                    )
                     if model.showsRemaining {
-                        Text("\(model.remainingSeconds)")
-                            .font(.system(size: 76, weight: .bold, design: .rounded))
-                            .monospacedDigit()
-                            .foregroundStyle(Color(red: 0.04, green: 0.19, blue: 0.42))
+                        AnimatedCountdownNumber(value: model.remainingSeconds)
                     }
                     Text(model.detail)
                         .font(.system(size: 16, weight: .regular))
@@ -331,6 +358,55 @@ private struct CountdownOverlayView: View {
             .shadow(color: .black.opacity(0.45), radius: 26, x: 0, y: 14)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+    }
+}
+
+private struct AnimatedCountdownTitle: View {
+    let title: String
+    let remainingSeconds: Int
+    let animatesNumber: Bool
+
+    @ViewBuilder
+    var body: some View {
+        if #available(macOS 14.0, *), animatesNumber {
+            titleText
+                .contentTransition(.numericText(countsDown: true))
+        } else {
+            titleText
+                .id(title)
+                .transition(.opacity)
+        }
+    }
+
+    private var titleText: some View {
+        Text(title)
+            .font(.system(size: 28, weight: .semibold))
+            .foregroundStyle(.black)
+    }
+}
+
+private struct AnimatedCountdownNumber: View {
+    let value: Int
+
+    @ViewBuilder
+    var body: some View {
+        if #available(macOS 14.0, *) {
+            numberText
+                .contentTransition(.numericText(countsDown: true))
+        } else {
+            ZStack {
+                numberText
+                    .id(value)
+                    .transition(.opacity)
+            }
+        }
+    }
+
+    private var numberText: some View {
+        Text("\(value)")
+            .font(.system(size: 76, weight: .bold, design: .rounded))
+            .monospacedDigit()
+            .foregroundStyle(Color(red: 0.04, green: 0.19, blue: 0.42))
     }
 }
 
